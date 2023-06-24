@@ -575,10 +575,10 @@ task(
       `Sending message "${taskArgs.message}" from ${hre.network.name} to ${taskArgs.remote}`
     );
 
-    const tx = await sender.sendString(
+    const tx = await sender.add(
       remoteDomain,
       utils.addressToBytes32(taskArgs.receiver),
-      taskArgs.message
+      13, 14      
     );
 
     const receipt = await tx.wait();
@@ -661,7 +661,7 @@ task(
         `Echoing message from ${hre.network.name} to ${taskArgs.remote}`
       );
   
-      const tx = await sender.sendAckString(
+      const tx = await sender.returnRes(
         remoteDomain,
         utils.addressToBytes32(taskArgs.receiver)
       );
