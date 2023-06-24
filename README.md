@@ -37,10 +37,10 @@ Now that you know how easy and quick sending Hyperlane messages are, you can dep
 $ yarn hardhat deploy-message-sender --network mumbai
 
 # Deploys the receiver
-$ yarn hardhat deploy-message-receiver --network goerli --origin mumbai
+$ yarn hardhat deploy-message-receiver --network sepolia
 
 # Send a message via the sender contract to the receiver contract
-$ yarn hardhat send-message-via-HyperlaneMessageSender --sender "SENDER_ADDRESS" --receiver "RECEIVER_ADDRESS" --remote goerli --network mumbai --message "Your message"
+$ yarn hardhat send-message-via-HyperlaneMessageSender --sender "SENDER_ADDRESS" --receiver "RECEIVER_ADDRESS" --remote sepolia --network mumbai --message "Hello Eth Waterloo"
 ```
 
 ### Accounts API
