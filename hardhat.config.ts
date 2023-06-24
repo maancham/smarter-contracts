@@ -12,6 +12,7 @@ import "@nomiclabs/hardhat-etherscan";
 import { HardhatUserConfig, task, types } from "hardhat/config";
 import { ethers, Event } from "ethers";
 import { Log } from "@ethersproject/abstract-provider";
+import { send } from "process";
 
 // TODO loosen hyperlaneCoreAddresses type in SDK to work with ChainName keys
 const hyperlaneCoreAddresses = HyperlaneCoreAddresses;
@@ -373,6 +374,139 @@ task(
     console.log(
       `Check out the explorer page for receiver ${recipientUrl}#events`
     );
+  });
+
+task(
+  "send-message-via-HyperlaneMessageTransceiver",
+  "sends a message via a deployed HyperlaneMessageTransceiver"
+)
+  .addParam(
+    "sender",
+    "Address of the HyperlaneMessageTransceiver",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam(
+    "receiver",
+    "address of the HyperlaneMessageTransceiver",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam(
+    "remote",
+    "Name of the remote chain on which HyperlaneMessageTransceiver is on",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam("message", "the message you want to send", "HelloWorld")
+  .setAction(async (taskArgs, hre) => {
+    const signer = (await hre.ethers.getSigners())[0];
+    const remote = taskArgs.remote as ChainName;
+    const network = hre.network.name as ChainName;
+    const remoteDomain = multiProvider.getDomainId(remote);
+    const originDomain = multiProvider.getDomainId(network);
+    const senderFactory = await hre.ethers.getContractFactory(
+      "HyperlaneMessageTransceiver"
+    );
+    const sender = senderFactory.attach(taskArgs.sender);
+
+    console.log(
+      `Sending message "${taskArgs.message}" from ${hre.network.name} to ${taskArgs.remote}`
+    );
+
+    const tx = await sender.sendString(
+      remoteDomain,
+      utils.addressToBytes32(taskArgs.receiver),
+      taskArgs.message
+    );
+
+    const receipt = await tx.wait();
+    console.log(
+      `Send message at txHash ${tx.hash}. Check the explorer at https://explorer.hyperlane.xyz/?search=${tx.hash}`
+    );
+
+    const receiveFactory = await hre.ethers.getContractFactory(
+      "HyperlaneMessageTransceiver"
+    );
+    const receiver = receiveFactory.attach(taskArgs.receiver);
+
+    console.log(
+      `Sending message "${taskArgs.message}" from ${taskArgs.remote} to ${hre.network.name} `
+    );
+
+    const backtx = await receiver.sendAckString();
+
+    const backreceipt = await backtx.wait();
+    console.log(
+      `Send message at txHash ${backtx.hash}. Check the explorer at https://explorer.hyperlane.xyz/?search=${backtx.hash}`
+    );
+
+    console.log(
+      "Pay for processing of the message via the InterchainGasPaymaster"
+    );
+    const messageId = getMessageIdFromDispatchLogs(receipt.logs);
+    const igpAddress =
+      hyperlaneCoreAddresses[hre.network.name].interchainGasPaymaster;
+    const igp = new hre.ethers.Contract(
+      igpAddress,
+      INTERCHAIN_GAS_PAYMASTER_ABI,
+      signer
+    );
+    const gasPayment = await igp.quoteGasPayment(
+      remoteDomain,
+      DESTINATIONGASAMOUNT
+    );
+    const igpTx = await igp.payForGas(
+      messageId,
+      remoteDomain,
+      DESTINATIONGASAMOUNT,
+      await signer.getAddress(),
+      { value: gasPayment }
+    );
+    await igpTx.wait();
+
+    const recipientUrl = await multiProvider.tryGetExplorerAddressUrl(
+      remote,
+      taskArgs.receiver
+    );
+    console.log(
+      `Check out the explorer page for receiver ${recipientUrl}#events`
+    );
+
+    // console.log(
+    //   "Pay for back processing of the message via the InterchainGasPaymaster"
+    // );
+    // const backmessageId = getMessageIdFromDispatchLogs(backreceipt.logs);
+    // const backigpAddress =
+    //   hyperlaneCoreAddresses[taskArgs.remote].interchainGasPaymaster;
+    // const backigp = new hre.ethers.Contract(
+    //   backigpAddress,
+    //   INTERCHAIN_GAS_PAYMASTER_ABI,
+    //   signer
+    // );
+    // const backgasPayment = await backigp.quoteGasPayment(
+    //   originDomain,
+    //   DESTINATIONGASAMOUNT
+    // );
+    // const backigpTx = await backigp.payForGas(
+    //   backmessageId,
+    //   originDomain,
+    //   DESTINATIONGASAMOUNT,
+    //   await signer.getAddress(),
+    //   { value: gasPayment }
+    // );
+    // await backigpTx.wait();
+
+    // const backrecipientUrl = await multiProvider.tryGetExplorerAddressUrl(
+    //   origin,
+    //   taskArgs.sender
+    // );
+    // console.log(
+    //   `Check out the explorer page for receiver ${backrecipientUrl}#events`
+    // );
   });
 
 task(

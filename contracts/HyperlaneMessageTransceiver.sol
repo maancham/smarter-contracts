@@ -12,9 +12,14 @@ contract HyperlaneMessageTransceiver {
 
     bytes32 public lastSender;
     string public lastMessage;
+    uint32 public lastOrigin;
 
     event ReceivedMessage(uint32 origin, bytes32 sender, bytes message);
-    event SentMessage(uint32 destinationDomain, bytes32 recipient, string message);
+    event SentMessage(
+        uint32 destinationDomain,
+        bytes32 recipient,
+        string message
+    );
 
     constructor(address _inbox, address _outbox) {
         inbox = IMailbox(_inbox);
@@ -26,9 +31,18 @@ contract HyperlaneMessageTransceiver {
         bytes32 _sender,
         bytes calldata _message
     ) external {
-      lastSender = _sender;
-      lastMessage = string(_message);
-      emit ReceivedMessage(_origin, _sender, _message);
+        lastSender = _sender;
+        lastOrigin = _origin;
+        lastMessage = string(_message);
+        emit ReceivedMessage(_origin, _sender, _message);
+    }
+
+    function sendAckString() external // uint32 _destinationDomain,
+    // bytes32 _recipient,
+    // string calldata _message
+    {
+        outbox.dispatch(lastOrigin, lastSender, bytes(lastMessage));
+        emit SentMessage(lastOrigin, lastSender, lastMessage);
     }
 
     function sendString(
