@@ -560,6 +560,27 @@ task(
     false
   )
   .addParam("message", "the message you want to send", "HelloWorld")
+  .addParam(
+    "first",
+    "First integer",
+    undefined,
+    types.int,
+    false
+  )
+  .addParam(
+    "second",
+    "Second integer",
+    undefined,
+    types.int,
+    false
+  )
+  .addParam(
+    "operator",
+    "ADD = 0, SUB = 1, MUL = 2",
+    undefined,
+    types.int,
+    false
+  )
   .setAction(async (taskArgs, hre) => {
     const signer = (await hre.ethers.getSigners())[0];
     const remote = taskArgs.remote as ChainName;
@@ -572,13 +593,13 @@ task(
     const sender = senderFactory.attach(taskArgs.sender);
 
     console.log(
-      `Sending message "${taskArgs.message}" from ${hre.network.name} to ${taskArgs.remote}`
+      `Sending operands "${taskArgs.first}" and "${taskArgs.second}" from ${hre.network.name} to ${taskArgs.remote}`
     );
 
-    const tx = await sender.add(
+    const tx = await sender.execute(
       remoteDomain,
       utils.addressToBytes32(taskArgs.receiver),
-      13, 14      
+      taskArgs.first, taskArgs.second, taskArgs.operator
     );
 
     const receipt = await tx.wait();
@@ -705,6 +726,100 @@ task(
   
     });
 
+
+task(
+  "get-result",
+  "Get the result stored in HyperlaneMessageTransceiver"
+)
+  .addParam(
+    "sender",
+    "Address of the HyperlaneMessageTransceiver",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam(
+    "receiver",
+    "address of the HyperlaneMessageTransceiver",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam(
+    "remote",
+    "Name of the remote chain on which HyperlaneMessageTransceiver is on",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam("message", "the message you want to send", "HelloWorld")
+  .setAction(async (taskArgs, hre) => {
+
+    const senderFactory = await hre.ethers.getContractFactory(
+      "HyperlaneMessageTransceiver"
+    );
+    const sender = senderFactory.attach(taskArgs.sender);
+
+    console.log(
+      `Echoing message from ${hre.network.name} to ${taskArgs.remote}`
+    );
+
+    const lastResult = await sender.result();
+    console.log(
+      `Last result in the origin chain: ${lastResult}`
+    );
+  });
+
+  async function chain_estimator(source_network, igp){
+    let remote_arr = ["alfajores", "fuji", "mumbai"];
+    // let remote_arr = ["arbitrum", "avalanche", "bsc", "celo", "ethereum", "polygon"];
+    let gas_fee_dict = new Map<string, number>();
+    let min = Infinity;
+    let min_remote = "";
+  
+    for (var remote_srt of remote_arr){
+      if (source_network == remote_srt)
+        continue;
+      
+      const remote = remote_srt as ChainName;
+      const network = source_network as ChainName;
+      const remoteDomain = multiProvider.getDomainId(remote);
+  
+      const gasPayment = await igp.quoteGasPayment(
+        remoteDomain,
+        DESTINATIONGASAMOUNT
+      );
+  
+      gas_fee_dict.set(remote_srt, gasPayment);
+      if(gasPayment - min < 0){
+        min = gasPayment;
+        min_remote = remote_srt;
+      }
+  
+    }
+    console.log(gas_fee_dict);
+    return [min_remote, min];
+  }
+  
+  task(
+    "chain-estimator",
+    "sends a message via a deployed HyperlaneMessageTransceiver"
+  )
+    .setAction(async (taskArgs, hre) => {
+      const signer = (await hre.ethers.getSigners())[0];
+      
+      const igpAddress = hyperlaneCoreAddresses[hre.network.name].interchainGasPaymaster;
+  
+      const igp = new hre.ethers.Contract(
+      igpAddress,
+      INTERCHAIN_GAS_PAYMASTER_ABI,
+      signer
+      );
+      
+      let min_remote = await chain_estimator(hre.network.name, igp);
+      // console.log(result);
+      console.log(`Chain: ${min_remote[0]} Estimation: ${min_remote[1]}`)
+  });
 
 export default config;
 
