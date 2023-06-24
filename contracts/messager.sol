@@ -38,14 +38,12 @@ contract Messager {
     function handle(
         uint32 _origin,
         bytes32 _sender,
-        bytes calldata _message,
-        uint32 _arg1,
-        uint32 _arg2
+        bytes calldata _message
 
     ) external {
       lastSender = _sender;
       lastMessage = string(_message);
-      emit ReceivedMessage(_origin, _sender, _message, _arg1, _arg2);
+      emit ReceivedMessage(_origin, _sender, _message);
 
       //TODO: execute F(a,b), when it's done return the result for F(a,b)
       newMessage = string(abi.encodePacked("Hi ", _message));
