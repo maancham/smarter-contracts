@@ -8,13 +8,18 @@ import "@hyperlane-xyz/core/interfaces/IMailbox.sol";
 
 contract Messager {
     IMailbox outbox;
+    IMailbox inbox;
     bytes32 public lastSender;
     string public lastMessage;
+    string public newMessage;
+    uint32 public arg1;
+    uint32 public arg2;
     
     event SentMessage(uint32 destinationDomain, bytes32 recipient, string message);
     event ReceivedMessage(uint32 origin, bytes32 sender, bytes message);
 
-    constructor(address _outbox) {
+    constructor(address _inbox, address _outbox) {
+        inbox = IMailbox(_inbox);
         outbox = IMailbox(_outbox);
     }
 
@@ -23,6 +28,7 @@ contract Messager {
         bytes32 _recipient,
         string calldata _message
     ) external {
+
         outbox.dispatch(_destinationDomain, _recipient, bytes(_message));
         emit SentMessage(_destinationDomain, _recipient, _message);
     }
@@ -32,10 +38,18 @@ contract Messager {
     function handle(
         uint32 _origin,
         bytes32 _sender,
-        bytes calldata _message
+        bytes calldata _message,
+        uint32 _arg1,
+        uint32 _arg2
+
     ) external {
       lastSender = _sender;
       lastMessage = string(_message);
-      emit ReceivedMessage(_origin, _sender, _message);
+      emit ReceivedMessage(_origin, _sender, _message, _arg1, _arg2);
+
+      //TODO: execute F(a,b), when it's done return the result for F(a,b)
+      newMessage = string(abi.encodePacked("Hi ", _message));
+      outbox.dispatch(_origin, _sender, bytes(newMessage));
+      emit SentMessage(_origin, _sender, newMessage);
     }
 }

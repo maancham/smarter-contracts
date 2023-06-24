@@ -267,6 +267,32 @@ task(
 });
 
 task(
+  "deploy-messager",
+  "deploys the Custom Messager contract"
+).setAction(async (taskArgs, hre) => {
+  console.log(`Deploying HyperlaneMessageTransceiver on ${hre.network.name}`);
+  const network = hre.network.name as ChainName;
+  const outbox = hyperlaneCoreAddresses[network].mailbox;
+  const inbox = hyperlaneCoreAddresses[network].mailbox;
+
+  const factory = await hre.ethers.getContractFactory(
+    "Messager"
+  );
+
+  const contract = await factory.deploy(inbox, outbox);
+  await contract.deployTransaction.wait();
+
+  console.log(
+    `Deployed HyperlaneMessageTransceiver to ${contract.address} on ${hre.network.name} with transaction ${contract.deployTransaction.hash}`
+  );
+
+  console.log("You can verify the contracts with:");
+  console.log(
+    `$ yarn hardhat verify --network ${hre.network.name} ${contract.address} ${outbox}`
+  );
+});
+
+task(
   "send-message-via-HyperlaneMessageSender",
   "sends a message via a deployed HyperlaneMessageSender"
 )

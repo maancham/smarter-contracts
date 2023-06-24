@@ -40,7 +40,11 @@ $ yarn hardhat deploy-message-sender --network mumbai
 $ yarn hardhat deploy-message-receiver --network sepolia
 
 # Send a message via the sender contract to the receiver contract
-$ yarn hardhat send-message-via-HyperlaneMessageSender --sender "SENDER_ADDRESS" --receiver "RECEIVER_ADDRESS" --remote sepolia --network mumbai --message "Hello Eth Waterloo"
+$ yarn hardhat send-message-via-HyperlaneMessageSender --sender "SENDER_ADDRESS" --receiver "RECEIVER_ADDRESS" --remote sepolia --network mumbai --message "From smarter contract on Mumbai to Sepolia sent by sean"
+
+yarn hardhat send-message-via-HyperlaneMessageSender --sender "0xF494aD644EA30fEa6bA45A871d11D11E5ad050eb" --receiver "0x52C57688D16bb1B3B46A6D5fBEda0fD4f4230AA7" --remote sepolia --network mumbai --message "From smarter contract on Mumbai to Sepolia sent by sean"
+
+yarn hardhat send-message-via-HyperlaneMessageSender --sender "0xd205C03f24A82D868A739d107DBe19c754A16d27" --receiver "0xD387E293222ff370b327242AEE5A191aa064624D" --remote sepolia --network mumbai --message "From smarter contract on Mumbai to Sepolia sent by sean but this time it should triger another call, so you should see this msg two times"
 ```
 
 ### Accounts API
