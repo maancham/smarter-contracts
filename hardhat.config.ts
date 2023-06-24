@@ -218,6 +218,32 @@ task("make-ica-call", "Makes an Interchain Account call")
   });
 
 task(
+  "deploy-message-transceiver",
+  "deploys the HyperlaneMessageTransceiver contract"
+).setAction(async (taskArgs, hre) => {
+  console.log(`Deploying HyperlaneMessageTransceiver on ${hre.network.name}`);
+  const origin = hre.network.name as ChainName;
+  const outbox = hyperlaneCoreAddresses[origin].mailbox;
+  const inbox = hyperlaneCoreAddresses[origin].mailbox;
+
+  const factory = await hre.ethers.getContractFactory(
+    "HyperlaneMessageTransceiver"
+  );
+
+  const contract = await factory.deploy(inbox, outbox);
+  await contract.deployTransaction.wait();
+
+  console.log(
+    `Deployed HyperlaneMessageTransceiver to ${contract.address} on ${hre.network.name} with transaction ${contract.deployTransaction.hash}`
+  );
+
+  console.log(`You can verify the contracts with:`);
+  console.log(
+    `$ yarn hardhat verify --network ${hre.network.name} ${contract.address} ${outbox}`
+  );
+});
+
+task(
   "deploy-message-sender",
   "deploys the HyperlaneMessageSender contract"
 ).setAction(async (taskArgs, hre) => {
@@ -350,24 +376,6 @@ task(
   });
 
 task(
-  "deploy-owner",
-  "deploys the Owner contract that can own things cross-chain"
-).setAction(async (_, hre) => {
-  console.log(`Deploying Owner on ${hre.network.name}`);
-  const factory = await hre.ethers.getContractFactory("Owner");
-  const contract = await factory.deploy(INTERCHAIN_ACCOUNT_ROUTER);
-  await contract.deployTransaction.wait();
-
-  console.log(
-    `Deployed Owner to ${contract.address} on ${hre.network.name} with transaction ${contract.deployTransaction.hash}`
-  );
-  console.log(`You can verify the contracts with:`);
-  console.log(
-    `$ yarn hardhat verify --network ${hre.network.name} ${contract.address} ${INTERCHAIN_ACCOUNT_ROUTER}`
-  );
-});
-
-task(
   "get-ica-address",
   "Gets the ICA account address for an address on a given chain"
 )
@@ -390,26 +398,6 @@ task(
     );
     console.info(
       `The ICA of ${taskArgs.address} on ${hre.network.name} (${originDomain}) is ${ica}`
-    );
-  });
-
-task(
-  "deploy-ownee",
-  "deploys the Ownee contract (that has no cross-chain-specific code)"
-)
-  .addParam("owner", "address of the owner", undefined, types.string, false)
-  .setAction(async (taskArgs, hre) => {
-    console.log(`Deploying Ownee on ${hre.network.name}`);
-    const factory = await hre.ethers.getContractFactory("Ownee");
-    const contract = await factory.deploy(taskArgs.owner);
-    await contract.deployTransaction.wait();
-
-    console.log(
-      `Deployed Ownee to ${contract.address} on ${hre.network.name} with transaction ${contract.deployTransaction.hash}`
-    );
-    console.log(`You can verify the contracts with:`);
-    console.log(
-      `$ yarn hardhat verify --network ${hre.network.name} ${contract.address} ${taskArgs.ownee}`
     );
   });
 
