@@ -1,2 +1,2 @@
 # smarter-contracts
-EthWaterloo
+Our group repository for ETHWaterloo
