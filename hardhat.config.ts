@@ -560,6 +560,20 @@ task(
     false
   )
   .addParam("message", "the message you want to send", "HelloWorld")
+  .addParam(
+    "first",
+    "First integer",
+    undefined,
+    types.int,
+    false
+  )
+  .addParam(
+    "second",
+    "Second integer",
+    undefined,
+    types.int,
+    false
+  )
   .setAction(async (taskArgs, hre) => {
     const signer = (await hre.ethers.getSigners())[0];
     const remote = taskArgs.remote as ChainName;
@@ -578,7 +592,7 @@ task(
     const tx = await sender.add(
       remoteDomain,
       utils.addressToBytes32(taskArgs.receiver),
-      13, 14      
+      taskArgs.first, taskArgs.second
     );
 
     const receipt = await tx.wait();
