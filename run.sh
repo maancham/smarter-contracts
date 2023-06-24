@@ -1,4 +1,5 @@
 yarn hardhat compile
-yarn hardhat deploy-message-sender --network mumbai
-yarn hardhat deploy-message-sender --network sepolia
-yarn hardhat send-message-via-HyperlaneMessageSender --sender "0xD387E293222ff370b327242AEE5A191aa064624D" --receiver "0xF432ac34f73f449406f82107259DCe0d31DFC410" --remote sepolia --network mumbai --message "Hello Eth Waterloo"
+yarn hardhat deploy-message-transceiver --network mumbai
+yarn hardhat deploy-message-transceiver --network alfajores
+yarn hardhat send-syn-message --sender "0xe14d26CE33b5BF40e894979A61994dd0C92B6A64" --receiver "0x85aAFeF595192d03c57844Cbaf6574Fbff575165" --remote alfajores --network mumbai --message "211:Hello Eth Waterloo"
+yarn hardhat send-ack-message --sender "0x85aAFeF595192d03c57844Cbaf6574Fbff575165" --receiver "0xe14d26CE33b5BF40e894979A61994dd0C92B6A64" --remote mumbai --network alfajores

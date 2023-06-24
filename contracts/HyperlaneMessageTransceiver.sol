@@ -29,6 +29,7 @@ contract HyperlaneMessageTransceiver {
 
     bytes32 public lastSender;
     string public lastMessage;
+    uint32 public lastDomain;
 
     event ReceivedMessage(uint32 origin, bytes32 sender, bytes message);
 
@@ -38,8 +39,18 @@ contract HyperlaneMessageTransceiver {
         bytes calldata _message
     ) external {
       lastSender = _sender;
+      lastDomain = _origin;
       lastMessage = string(_message);
       emit ReceivedMessage(_origin, _sender, _message);
     }
+
+    function sendAckString(
+        uint32 _destinationDomain,
+        bytes32 _recipient
+    ) external {
+        outbox.dispatch(_destinationDomain, _recipient, bytes(lastMessage));
+        emit SentMessage(_destinationDomain, _recipient, lastMessage);
+    }
+
 
 }
