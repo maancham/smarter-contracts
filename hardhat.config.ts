@@ -16,15 +16,6 @@ import { Log } from "@ethersproject/abstract-provider";
 // TODO loosen hyperlaneCoreAddresses type in SDK to work with ChainName keys
 const hyperlaneCoreAddresses = HyperlaneCoreAddresses;
 
-// Use mnemonic ...
-// const accounts = {
-//   mnemonic: "test test test test test test test test test test test junk",
-//   path: "m/44'/60'/0'/0",
-//   initialIndex: 0,
-//   count: 20,
-//   passphrase: "",
-// }
-// ... or a direct private key
 const accounts = [
   "55295c701e0098e369c582b8b76d43dfa05a45dc237acff893f0d18eab21823f",
 ];
@@ -125,7 +116,7 @@ task("send-message", "sends a message")
       messageId,
       remoteDomain,
       DESTINATIONGASAMOUNT,
-      await signer.getAddress(),
+      await signer.gecltAddress(),
       { value: gasPayment }
     );
     await igpTx.wait();
@@ -266,31 +257,28 @@ task(
   );
 });
 
-task(
-  "deploy-messager",
-  "deploys the Custom Messager contract"
-).setAction(async (taskArgs, hre) => {
-  console.log(`Deploying HyperlaneMessageTransceiver on ${hre.network.name}`);
-  const network = hre.network.name as ChainName;
-  const outbox = hyperlaneCoreAddresses[network].mailbox;
-  const inbox = hyperlaneCoreAddresses[network].mailbox;
+task("deploy-messager", "deploys the Custom Messager contract").setAction(
+  async (taskArgs, hre) => {
+    console.log(`Deploying HyperlaneMessageTransceiver on ${hre.network.name}`);
+    const network = hre.network.name as ChainName;
+    const outbox = hyperlaneCoreAddresses[network].mailbox;
+    const inbox = hyperlaneCoreAddresses[network].mailbox;
 
-  const factory = await hre.ethers.getContractFactory(
-    "Messager"
-  );
+    const factory = await hre.ethers.getContractFactory("Messager");
 
-  const contract = await factory.deploy(inbox, outbox);
-  await contract.deployTransaction.wait();
+    const contract = await factory.deploy(inbox, outbox);
+    await contract.deployTransaction.wait();
 
-  console.log(
-    `Deployed HyperlaneMessageTransceiver to ${contract.address} on ${hre.network.name} with transaction ${contract.deployTransaction.hash}`
-  );
+    console.log(
+      `Deployed HyperlaneMessageTransceiver to ${contract.address} on ${hre.network.name} with transaction ${contract.deployTransaction.hash}`
+    );
 
-  console.log("You can verify the contracts with:");
-  console.log(
-    `$ yarn hardhat verify --network ${hre.network.name} ${contract.address} ${outbox}`
-  );
-});
+    console.log("You can verify the contracts with:");
+    console.log(
+      `$ yarn hardhat verify --network ${hre.network.name} ${contract.address} ${outbox}`
+    );
+  }
+);
 
 task(
   "send-message-via-HyperlaneMessageSender",
