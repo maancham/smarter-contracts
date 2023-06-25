@@ -7,7 +7,7 @@ remote=$(yarn hardhat deploy-message-transceiver --network alfajores | grep "Dep
 echo "Deployed $remote"
 yarn hardhat send-syn-message --sender $origin --receiver $remote --remote alfajores --network mumbai
 echo "Sent SYN from $origin to $remote!"
-sleep 120
-yarn hardhat send-ack-message --sender $remote --receiver $origin --remote mumbai --network alfajores
-echo "Sent ACK from $remote to $origin!"
+# sleep 120
+# yarn hardhat send-ack-message --sender $remote --receiver $origin --remote mumbai --network alfajores
+# echo "Sent ACK from $remote to $origin!"
 
