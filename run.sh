@@ -22,10 +22,10 @@ remote=$(yarn hardhat deploy-message-transceiver --network $remoteChain | grep "
 echo "Deployed $remote"
 yarn hardhat send-syn-message --sender $origin --receiver $remote --remote $remoteChain --network $originChain --first $first --second $second --operator $operator
 echo "Sent SYN from $origin to $remote!"
-sleep 120
+sleep 45
 yarn hardhat send-ack-message --sender $remote --receiver $origin --remote $originChain --network $remoteChain
 echo "Sent ACK from $remote to $origin!"
-sleep 60
+sleep 30
 echo "Getting result!"
 yarn hardhat get-result --sender $origin --receiver $remote --remote $remoteChain --network $originChain
 
