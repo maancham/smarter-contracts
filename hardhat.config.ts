@@ -720,6 +720,49 @@ task(
     });
 
 
+task(
+  "get-result",
+  "Get the result stored in HyperlaneMessageTransceiver"
+)
+  .addParam(
+    "sender",
+    "Address of the HyperlaneMessageTransceiver",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam(
+    "receiver",
+    "address of the HyperlaneMessageTransceiver",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam(
+    "remote",
+    "Name of the remote chain on which HyperlaneMessageTransceiver is on",
+    undefined,
+    types.string,
+    false
+  )
+  .addParam("message", "the message you want to send", "HelloWorld")
+  .setAction(async (taskArgs, hre) => {
+
+    const senderFactory = await hre.ethers.getContractFactory(
+      "HyperlaneMessageTransceiver"
+    );
+    const sender = senderFactory.attach(taskArgs.sender);
+
+    console.log(
+      `Echoing message from ${hre.network.name} to ${taskArgs.remote}`
+    );
+
+    const lastResult = await sender.result();
+    console.log(
+      `Last result in the origin chain: ${lastResult}`
+    );
+  });
+
 export default config;
 
 function getMessageIdFromDispatchLogs(logs: Log[]) {

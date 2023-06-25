@@ -1,4 +1,3 @@
-message=$1
 originChain="mumbai"
 remoteChain="alfajores"
 
@@ -12,4 +11,7 @@ echo "Sent SYN from $origin to $remote!"
 sleep 120
 yarn hardhat send-ack-message --sender $remote --receiver $origin --remote $originChain --network $remoteChain
 echo "Sent ACK from $remote to $origin!"
+sleep 120
+echo "Getting result!"
+yarn hardhat get-result --sender $origin --receiver $remote --remote $remoteChain --network $originChain
 
