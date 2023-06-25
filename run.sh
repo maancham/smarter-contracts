@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Run it as ./run.sh <first_operand> <second_operand> <operator>
+# Run it as ./run.sh <origin_chain> <operator> <first_operand> <second_operand>
 # OP_CODE: ADD = 0, SUB = 1, MUL = 2
 
-first=$1
-second=$2
-operator=$3
-originChain="mumbai"
+originChain=$1
+operator=$2
+first=$3
+second=$4
 
 yarn hardhat compile
 
