@@ -574,6 +574,13 @@ task(
     types.int,
     false
   )
+  .addParam(
+    "operator",
+    "ADD = 0, SUB = 1, MUL = 2",
+    undefined,
+    types.int,
+    false
+  )
   .setAction(async (taskArgs, hre) => {
     const signer = (await hre.ethers.getSigners())[0];
     const remote = taskArgs.remote as ChainName;
@@ -589,10 +596,10 @@ task(
       `Sending message "${taskArgs.message}" from ${hre.network.name} to ${taskArgs.remote}`
     );
 
-    const tx = await sender.add(
+    const tx = await sender.execute(
       remoteDomain,
       utils.addressToBytes32(taskArgs.receiver),
-      taskArgs.first, taskArgs.second
+      taskArgs.first, taskArgs.second, taskArgs.operator
     );
 
     const receipt = await tx.wait();
