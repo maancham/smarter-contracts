@@ -7,9 +7,15 @@ first=$1
 second=$2
 operator=$3
 originChain="mumbai"
-remoteChain="alfajores"
 
 yarn hardhat compile
+
+cheapestChainLine=$(yarn hardhat chain-estimator --network  $originChain | grep "Estimation:")
+
+remoteChain=$(echo $cheapestChainLine | awk '{print $2}')
+remoteChainCost=$(echo $cheapestChainLine | awk '{print $4}')
+echo "The cheapest chain is $remoteChain$ with the gas fee of $remoteChainCost"
+
 origin=$(yarn hardhat deploy-message-transceiver --network $originChain | grep "Deployed HyperlaneMessageTransceiver" | awk '{print $4}')
 echo "Deployed $origin"
 remote=$(yarn hardhat deploy-message-transceiver --network $remoteChain | grep "Deployed HyperlaneMessageTransceiver" | awk '{print $4}')

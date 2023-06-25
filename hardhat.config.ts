@@ -798,7 +798,7 @@ task(
   
     }
     console.log(gas_fee_dict);
-    return min_remote;
+    return [min_remote, min];
   }
   
   task(
@@ -816,9 +816,9 @@ task(
       signer
       );
       
-      const min_remote = await chain_estimator(hre.network.name, igp);
+      let min_remote = await chain_estimator(hre.network.name, igp);
       // console.log(result);
-      console.log(min remote: ${min_remote})
+      console.log(`Chain: ${min_remote[0]} Estimation: ${min_remote[1]}`)
   });
 
 export default config;
