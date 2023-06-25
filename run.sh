@@ -25,7 +25,7 @@ echo "Sent SYN from $origin to $remote!"
 sleep 45
 yarn hardhat send-ack-message --sender $remote --receiver $origin --remote $originChain --network $remoteChain
 echo "Sent ACK from $remote to $origin!"
-sleep 30
+sleep 60
 echo "Getting result!"
 yarn hardhat get-result --sender $origin --receiver $remote --remote $remoteChain --network $originChain
 

@@ -593,7 +593,7 @@ task(
     const sender = senderFactory.attach(taskArgs.sender);
 
     console.log(
-      `Sending message "${taskArgs.message}" from ${hre.network.name} to ${taskArgs.remote}`
+      `Sending operands "${taskArgs.first}" and "${taskArgs.second}" from ${hre.network.name} to ${taskArgs.remote}`
     );
 
     const tx = await sender.execute(
@@ -771,7 +771,7 @@ task(
   });
 
   async function chain_estimator(source_network, igp){
-    let remote_arr = ["alfajores", "fuji", "goerli", "sepolia", "mumbai"];
+    let remote_arr = ["alfajores", "fuji", "mumbai"];
     // let remote_arr = ["arbitrum", "avalanche", "bsc", "celo", "ethereum", "polygon"];
     let gas_fee_dict = new Map<string, number>();
     let min = Infinity;
