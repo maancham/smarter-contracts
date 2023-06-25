@@ -770,6 +770,57 @@ task(
     );
   });
 
+  async function chain_estimator(source_network, igp){
+    let remote_arr = ["alfajores", "fuji", "goerli", "sepolia", "mumbai"];
+    // let remote_arr = ["arbitrum", "avalanche", "bsc", "celo", "ethereum", "polygon"];
+    let gas_fee_dict = new Map<string, number>();
+    let min = Infinity;
+    let min_remote = "";
+  
+    for (var remote_srt of remote_arr){
+      if (source_network == remote_srt)
+        continue;
+      
+      const remote = remote_srt as ChainName;
+      const network = source_network as ChainName;
+      const remoteDomain = multiProvider.getDomainId(remote);
+  
+      const gasPayment = await igp.quoteGasPayment(
+        remoteDomain,
+        DESTINATIONGASAMOUNT
+      );
+  
+      gas_fee_dict.set(remote_srt, gasPayment);
+      if(gasPayment - min < 0){
+        min = gasPayment;
+        min_remote = remote_srt;
+      }
+  
+    }
+    console.log(gas_fee_dict);
+    return min_remote;
+  }
+  
+  task(
+    "chain-estimator",
+    "sends a message via a deployed HyperlaneMessageTransceiver"
+  )
+    .setAction(async (taskArgs, hre) => {
+      const signer = (await hre.ethers.getSigners())[0];
+      
+      const igpAddress = hyperlaneCoreAddresses[hre.network.name].interchainGasPaymaster;
+  
+      const igp = new hre.ethers.Contract(
+      igpAddress,
+      INTERCHAIN_GAS_PAYMASTER_ABI,
+      signer
+      );
+      
+      const min_remote = await chain_estimator(hre.network.name, igp);
+      // console.log(result);
+      console.log(min remote: ${min_remote})
+  });
+
 export default config;
 
 function getMessageIdFromDispatchLogs(logs: Log[]) {
