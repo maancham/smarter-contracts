@@ -1,1 +1,0 @@
-yarn hardhat send-message-via-HyperlaneMessageTransceiver --sender "0x6EF67294Cbaefd74C669f520714d59Ac4638448f" --receiver "0xc673CdC074C5cac7C0D98286259973896dA9719E" --remote sepolia --network mumbai --message "01: Hello Ethwaterloo smarter!"
