@@ -52,15 +52,6 @@ const INTERCHAIN_GAS_PAYMASTER_ABI = [
   "function payForGas(bytes32 _messageId, uint32 _destinationDomain, uint256 _gasAmount, address _refundAddress) payable",
   "function quoteGasPayment(uint32 _destinationDomain, uint256 _gasAmount) public view returns (uint256)",
 ];
-const INTERCHAIN_ACCOUNT_ROUTER_ABI = [
-  "function dispatch(uint32 _destinationDomain, (address, bytes)[] calldata calls)",
-];
-const TESTRECIPIENT_ABI = [
-  "function fooBar(uint256 amount, string calldata message)",
-];
-
-const INTERCHAIN_ACCOUNT_ROUTER = "0xc61Bbf8eAb0b748Ecb532A7ffC49Ab7ca6D3a39D";
-const INTERCHAIN_QUERY_ROUTER = "0x6141e7E7fA2c1beB8be030B0a7DB4b8A10c7c3cd";
 
 // A global constant for simplicity
 // This is the amount of gas you will be paying for for processing of a message on the destination
@@ -308,9 +299,8 @@ task("get-result", "Get the result stored in HyperlaneMessageTransceiver")
     console.log(`Last result in the origin chain: ${lastResult}`);
   });
 
-async function chain_estimator(source_network, igp) {
+async function chain_estimator(source_network: string, igp: ethers.Contract) {
   let remote_arr = ["alfajores", "fuji", "mumbai"];
-  // let remote_arr = ["arbitrum", "avalanche", "bsc", "celo", "ethereum", "polygon"];
   let gas_fee_dict = new Map<string, number>();
   let min = Infinity;
   let min_remote = "";
@@ -339,7 +329,7 @@ async function chain_estimator(source_network, igp) {
 
 task(
   "chain-estimator",
-  "sends a message via a deployed HyperlaneMessageTransceiver"
+  "returns the cheapest destination chain to perfom actions, based on origin chain"
 ).setAction(async (taskArgs, hre) => {
   const signer = (await hre.ethers.getSigners())[0];
 
